@@ -36,9 +36,11 @@ make -j8
 ```
 
 
+## Webassembly integration 
 
+To-do
 
-### Use demo driver to recognize pictures
+### Aside: Test demo driver (standard build) to recognize pictures
 
 ```
 cp pictureRecognition.out ../../demo/pictureRecognition.out
