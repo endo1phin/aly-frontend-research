@@ -4,7 +4,11 @@ A webapp that uses webassembly to run mobilenet_v3 tensorflow checkpoint compile
 
 ## Build MNN Demo
 
-### Build demo driver and converter
+### 0. Install Emscripten
+
+[Link](https://emscripten.org/docs/getting_started/downloads.html)
+
+### 1. Build converter
 
 https://www.yuque.com/mnn/cn/build_linux
 
@@ -12,17 +16,27 @@ https://www.yuque.com/mnn/cn/build_linux
 cd MNN
 ./schema/generate.sh
 mkdir build && cd build 
-cmake -DMNN_BUILD_DEMO=ON -DMNN_BUILD_CONVERTER=ON .. 
+cmake -DMNN_BUILD_CONVERTER=ON .. 
 make -j8
 ```
 
-### Convert mobilenet model
+### 2. Convert mobilenet model
 
 [Download](https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/README.md) mobilenet v3 checkpoint.
 
 ```bash 
 ./MNNConvert -f TF --modelFile ../../demo/mobilenet-v3.pb --MNNModel ../../demo/mobilenet-v3.mnn --bizCode biz
 ```
+
+### 3. Build demo driver using Emscripten
+
+```bash
+/usr/local/Cellar/emscripten/1.39.18/bin/emcmake cmake -DMNN_BUILD_DEMO=ON ..
+/usr/local/Cellar/emscripten/1.39.18/bin/emmake make
+```
+
+
+
 
 ### Use demo driver to recognize pictures
 

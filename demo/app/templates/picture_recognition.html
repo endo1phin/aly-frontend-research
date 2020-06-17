@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+    <head>
+
+    </head>
+
+    <body>
+        <button id="click">Click</button>
+        <script>
+            WebAssembly.instantiateStreaming(fetch('picture_recognition_wasm'), importObject)
+            .then(obj => obj.instance.exports.exported_func());
+        </script>
+    </body>
+
+
+</html>

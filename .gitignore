@@ -1,6 +1,7 @@
 MNN/
 mnn-paper.pdf
 .DS_Store
+__pycache__/
 
 # Prerequisites
 *.d
