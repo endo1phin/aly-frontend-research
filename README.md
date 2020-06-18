@@ -1,4 +1,4 @@
-# WASM-MNN Integration
+# WASM-MNN Integration 
 
 ## Project Setup
 
@@ -137,42 +137,8 @@ emmake make multiPose.out
 ```
 
 ### 5. Test WASM Build Demos
-#### Pose model
 
-```
-node multiPose.out.js ../../../pose_model.mnn ../../../pose_input.png ../../../pose_output_wasm.png
-```
-Output:
-```
-Invalid path: ../../../pose_input.png
-```
-
-#### Segment model
-```
-node segment.out.js ../../../segment_model.mnn ../../../segment_input.png ../../../segment_output_wasm.png    
-```
-Output:
-```
-Error for open ../../../segment_model.mnn
-Invalid Model
-```
-
-#### Recognition model
-```
-node pictureRecognition.out.js ../../../preload/recognition_model.mnn ../../../preload/recognition_input.jpg ../../../preload/recognition_text.txt
-```
-Output: 
-```
-Create interpreter failed, open ../../../recognition_model.mnn error
-The model buffer has been released. Can't create session
-Error for 155
-Error for 233
-The model buffer has been released. Can't resize session
-Error for 165
-Error for 184
-input: w:1 , h:1, bpp: 1
-Can't open ../../../recognition_input.jpg
-```
+See README in `demo`
 
 ## Webassembly integration 
 
