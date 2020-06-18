@@ -2,6 +2,11 @@ MNN/
 mnn-paper.pdf
 .DS_Store
 __pycache__/
+preload/
+original_models/
+*.out.data
+*.out.wasm
+*.out.js
 
 # Prerequisites
 *.d
