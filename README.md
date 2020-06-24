@@ -60,18 +60,18 @@ make -j8
 
 
 ```bash 
-./MNNConvert -f TF --modelFile ../../../original_models/pose_model.pb --MNNModel ../../../pose_model.mnn --bizCode biz  
+./MNNConvert -f TF --modelFile ../../../original_models/pose_model.pb --MNNModel ../../../preload/pose_model.mnn --bizCode biz  
 
-./MNNConvert -f TFLITE --modelFile ../../../original_models/segment_model.tflite --MNNModel ../../../segment_model.mnn --bizCode biz
+./MNNConvert -f TFLITE --modelFile ../../../original_models/segment_model.tflite --MNNModel ../../../preload/segment_model.mnn --bizCode biz
 
-./MNNConvert -f TF --modelFile ../../../original_models/recognition_model.pb --MNNModel ../../../recognition_model.mnn --bizCode biz
+./MNNConvert -f TF --modelFile ../../../original_models/recognition_model.pb --MNNModel ../../../preload/recognition_model.mnn --bizCode biz
 ```
 
 ### 3. Test Normal Build Demos
 #### Pose model
 
 ```
-./multiPose.out ../../../pose_model.mnn ../../../pose_input.png ../../../pose_output_normal.png
+./multiPose.out ../../../preload/pose_model.mnn ../../../preload/pose_input.png ../../../preload/pose_output_normal.png
 ```
 Output:
 ```
@@ -81,7 +81,7 @@ main, 405, cost time: 0.144000 ms
 
 #### Segment model
 ```
-./segment.out ../../../segment_model.mnn ../../../segment_input.png ../../../segment_output_normal.png    
+./segment.out ../../../preload/segment_model.mnn ../../../segment_input.png ../../../segment_output_normal.png    
 ```
 Output:
 ```
@@ -92,7 +92,7 @@ Mask: w=257, h=257, c=21
 
 #### Recognition model
 ```
-./pictureRecognition.out ../../../recognition_model.mnn ../../../recognition_input.jpg ../../../recognition_text.txt
+./pictureRecognition.out ../../../preload/recognition_model.mnn ../../../preload/recognition_input.jpg ../../../preload/recognition_text.txt
 ```
 Output: 
 ```
@@ -123,14 +123,33 @@ cd wasm_build/MNN
 ./schema/generate.sh
 mkdir build && cd build 
 ```
-Since emcc needs to preload the file system when building, we need to append a compiler flag at the bottom of `CMakeList.txt`:
+
+CMake configuration command:
 
 ```
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --preload-file ../../../preload")
+emcmake cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-s ASSERTIONS=2 -s INITIAL_MEMORY=2080374784 --preload-file /Users/zhenfengqiu/aly-frontend-research/preload@/ --pre-js pre-js.js" -DCMAKE_SHARED_LINKER_FLAGS="-s SIDE_MODULE=1 -DMNN_BUILD_DEMO=ON ..
 ```
+Compiler flags (gcc): 
+
+- `ASSERTIONS=2`: debugging option to check for stack and heap problems
+- `INITIAL_MEMORY=2080374784`: see [issue#1](https://github.com/endo1phin/aly-frontend-research/issues/1)
+- `USE_PTHREADS=1`: see [issue#2](https://github.com/endo1phin/aly-frontend-research/issues/2) (Not compatible with dynamic linking?)
+- `RELOCATABLE=1`: [gcc link option](https://gcc.gnu.org/onlinedocs/gcc-10.1.0/gcc/Link-Options.html#Link-Options): Produce a relocatable object as output. This is also known as [partial linking](https://carsontang.github.io/unix/2013/06/01/guide-to-object-file-linking/).
+- `--preload-file`: containing the converted models and input file
+- `--pre-js`: specify model and input name in `Module[arguments]` for the main program
+
+
+
+Linker flag (Emscripten):
+- `SIDE_MODULE=1`: dynamically linked side modules that does not contain system library, see [Emscripten's linking wiki](https://github.com/emscripten-core/emscripten/wiki/Linking)
+
+
+```
+emcmake cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-s RELOCATABLE=1 -s ASSERTIONS=2 -s INITIAL_MEMORY=2080374784" -DCMAKE_SHARED_LINKER_FLAGS="-s SIDE_MODULE=1"
+```
+
 Continue down the toolchain, using emcc wrappers:
 ```
-emcmake cmake -DMNN_BUILD_DEMO=ON ..
 emmake make pictureRecognition.out
 emmake make segment.out 
 emmake make multiPose.out
@@ -139,6 +158,13 @@ emmake make multiPose.out
 ### 5. Test WASM Build Demos
 
 See README in `demo`
+
+Flask environment variables:
+```
+export FLASK_APP=app.py
+export FLASK_ENV=development
+flask run
+```
 
 ## Webassembly integration 
 

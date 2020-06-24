@@ -28,10 +28,10 @@ def fetch_data_segment():
 
 
 
-@app.route('/multiPose.out.wasm')
-def fetch_wasm_multiPose():
-    return send_file('static/multiPose.out.wasm', mimetype='application/wasm')
+# @app.route('/multiPose.out.wasm')
+# def fetch_wasm_multiPose():
+#     return send_file('static/multiPose.out.wasm', mimetype='application/wasm')
 
-@app.route('/multiPose.out.data')
-def fetch_data_multiPose():
-    return send_file('static/multiPose.out.data', mimetype='application/octet-stream')
+# @app.route('/multiPose.out.data')
+# def fetch_data_multiPose():
+#     return send_file('static/multiPose.out.data', mimetype='application/octet-stream')
