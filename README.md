@@ -41,6 +41,11 @@
 
 [Link](https://emscripten.org/docs/getting_started/downloads.html)
 
+Add emcc compiler and wrappers to PATH:
+```
+source /Users/zhenfengqiu/emsdk/emsdk_env.sh
+```
+
 ### 1. Normal Build (Converter & Demo)
 
 https://www.yuque.com/mnn/cn/build_linux
