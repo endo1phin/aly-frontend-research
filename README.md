@@ -129,17 +129,23 @@ cd wasm_build/MNN
 mkdir build && cd build 
 ```
 
-CMake configuration command:
+#### Build Dynamic Library
+
+First, set platform requirement to enable shared library compilation by adding the following line to CMakeLists.txt (added at line 38, after versioning and project specification):
 
 ```
-emcmake cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-s ASSERTIONS=2 -s INITIAL_MEMORY=2080374784 --preload-file /Users/zhenfengqiu/aly-frontend-research/preload@/ --pre-js pre-js.js" -DCMAKE_SHARED_LINKER_FLAGS="-s SIDE_MODULE=1 -DMNN_BUILD_DEMO=ON ..
+SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 ```
-Compiler flags (gcc): 
+
+Compile main library as side module:
+```
+emcmake cmake -DMNN_BUILD_DEMO=ON -DCMAKE_BUILD_TYPE=Debug -DMNN_SEP_BUILD=OFF -DCMAKE_CXX_FLAGS="-s RELOCATABLE=1 -s ASSERTIONS=2 -s INITIAL_MEMORY=2080374784" -DCMAKE_SHARED_LINKER_FLAGS="-s SIDE_MODULE=1" ..
+```
+Compiler flags: 
 
 - `ASSERTIONS=2`: debugging option to check for stack and heap problems
 - `INITIAL_MEMORY=2080374784`: see [issue#1](https://github.com/endo1phin/aly-frontend-research/issues/1)
-- `USE_PTHREADS=1`: see [issue#2](https://github.com/endo1phin/aly-frontend-research/issues/2) (Not compatible with dynamic linking?)
-- `RELOCATABLE=1`: [gcc link option](https://gcc.gnu.org/onlinedocs/gcc-10.1.0/gcc/Link-Options.html#Link-Options): Produce a relocatable object as output. This is also known as [partial linking](https://carsontang.github.io/unix/2013/06/01/guide-to-object-file-linking/).
+- `RELOCATABLE=1`  (implied by `SIDE_MODULE=1`): [gcc link option](https://gcc.gnu.org/onlinedocs/gcc-10.1.0/gcc/Link-Options.html#Link-Options): Produce a relocatable object as output. This is also known as [partial linking](https://carsontang.github.io/unix/2013/06/01/guide-to-object-file-linking/).
 - `--preload-file`: containing the converted models and input file
 - `--pre-js`: specify model and input name in `Module[arguments]` for the main program
 
@@ -148,17 +154,17 @@ Compiler flags (gcc):
 Linker flag (Emscripten):
 - `SIDE_MODULE=1`: dynamically linked side modules that does not contain system library, see [Emscripten's linking wiki](https://github.com/emscripten-core/emscripten/wiki/Linking)
 
+We also need to force the library to compile to `.wasm` instead of regular shared library file `.so` by changing the `-o libMNN.so` to `-o libMNN.wasm` in `CMakeFiles/MNN.dir/link.txt`. 
+
+Then run `emmake make -j12 MNN` where `-j` specify the # of thread used to compile. This should yield a `libMNN.wasm` in `/build`.
+
+Finally compile the main module (e.g. `multiPose.out`) with:
 
 ```
-emcmake cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-s RELOCATABLE=1 -s ASSERTIONS=2 -s INITIAL_MEMORY=2080374784" -DCMAKE_SHARED_LINKER_FLAGS="-s SIDE_MODULE=1"
+emcc ../demo/exec/multiPose.cpp -s MODULARIZE=1 -s MAIN_MODULE=1 -s ASSERTIONS=2 -s INITIAL_MEMORY=2080374784 -s RUNTIME_LINKED_LIBS="['libMNN.wasm']" --preload-file /Users/zhenfengqiu/aly-frontend-research/preload@/ --pre-js /Users/zhenfengqiu/aly-frontend-research/wasm_build/pre-js.js <libraries> -o multiPose.out.js 
 ```
 
-Continue down the toolchain, using emcc wrappers:
-```
-emmake make pictureRecognition.out
-emmake make segment.out 
-emmake make multiPose.out
-```
+Where `<libraries>` are contents of `CMakeFiles/multiPose.dir/includes_CXX.rsp`
 
 ### 5. Test WASM Build Demos
 
@@ -173,5 +179,5 @@ flask run
 
 ## Webassembly integration 
 
-To-do
+
 
